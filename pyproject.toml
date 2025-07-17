@@ -1,0 +1,14 @@
+[project]
+name = "ai-chess"
+version = "0.1.0"
+description = "Chess game using ollama and blessed"
+authors = [{ name = "averyvisentin", email = "averyvisentin@gmail.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["blessed<=1.21.0", "ollama<=0.5.1", "chess<=1.11.2"]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
