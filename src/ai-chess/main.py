@@ -6,6 +6,34 @@ import ollama
 import sys
 import os
 import traceback
+import sqlite3
+import json
+
+# --- Game Configuration & Constants ---
+script_dir = os.path.dirname(os.path.abspath(__file__)) # Get the absolute path of the directory containing this script.
+DATABASE_FILE = os.path.join(script_dir, 'chess.db') # Define the database file path to be in the same directory as the script. #the db will house all game data, history, and settings
+SETTINGS = {} # This global dictionary will be populated by load_settings() from the database.
+
+class GameDB:
+    def __init__(self):
+        self.db = sqlite3.connect(DATABASE_FILE)
+        self.cursor = self.db.cursor()
+        self.cursor.execute('')
+        self.cursor.execute('')
+        self.cursor.execute('')
+        self.cursor.execute('')
+
+
+    def save_settings(self, player1, player2, result):
+        self.cursor.execute('INSERT INTO games (user, model, result, date) VALUES (?, ?, ?, ?)', (user, model, result, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+        self.db.commit()
+
+
+    def close(self):
+        self.db.close()
+
+
+##we'd like keybind support for all game menus and whatnot, settings db managed, lets do enter to select, esc to close, space to toggle, arrow keys to navigate.
 
 class GameLauncher:
     """
@@ -15,9 +43,10 @@ class GameLauncher:
         self.term = term
         self.difficulties = ["Rookie", "Novice", "Normal", "Expert", "Grandmaster"]
         self.settings = {
-            "model_name": "gemma3:latest",
-            "temperature": 0.1,
-            "difficulty": "Normal",
+            "model_name": "gemma3:latest", #I'd like to use arrow keys to navigate when selection is here, use ollama.list or something to populate, we can add enter to for text input if they want to pull a specific model
+            "temperature": 0.1, #again, using the ollama api to change, we'd like to add something for other ollama settings that would be useful
+            "difficulty": "Normal", #the difficulty should change
+
         }
 
     def _draw_menu(self, title, options, selected_index):
@@ -53,9 +82,13 @@ class GameLauncher:
                         return options[selected_index]
                 elif key.lower() == 'q':
                     return "Quit"
-
+    ##let's display the current all time game record we get from the database
+    #
+    # or something
     def run_settings_menu(self):
         """Displays and handles the settings menu."""
+        ##arrow keys to change settings, s to save, q to quit, enter to select for input if needed
+        # esc to close app will be hardcoded
         while True:
             options = [
                 f"AI Model: {self.settings['model_name']}",
@@ -477,7 +510,7 @@ class ChessGame:
             "Novice": "You are a novice chess player. You understand the rules but lack deep strategy.",
             "Normal": "You are a skilled club-level chess player.",
             "Expert": "You are a chess expert. You play with deep strategic and tactical understanding.",
-            "Grandmaster": "You are a world-class chess grandmaster. You play with the utmost precision and find the best possible move in any position, even difficult ones. Analyze the full game history to anticipate your opponent's plan and formulate a long-term strategy."
+            "Grandmaster": "You are a world-class chess grandmaster. You play with the utmost precision and find the best possible move in any position, even difficult ones. Analyze the full game history to anticipate your opponent's plan and formulate a long-term strategy. You can see many moves ahead. You know when you are beaten."
         }
 
         # Select the persona based on the current difficulty setting
